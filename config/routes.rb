@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     member do
       get :members
     end
+    resources :comments, only: [ :create, :edit, :show, :update, :destroy ]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
