@@ -1,0 +1,277 @@
+
+openapi: 3.0.1
+
+info:
+  title: Employee Management  API
+  version: v1
+  description: API documentation for managing projects and project members.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Projects
+    description: Manage projects and their members
+
+paths:
+  /projects:
+    get:
+      summary: Get all projects
+      operationId: getProjects
+      tags:
+        - Projects
+      responses:
+        "200":
+          description: Projects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+
+    post:
+      summary: Create a project
+      operationId: createProject
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectRequest"
+            example:
+              project:
+                name: Employee Management
+                description: Employee project management API
+                status: planning
+                start_date: "2026-10-12"
+                end_date: "2026-12-31"
+                member_ids: [2, 3]
+      responses:
+        "201":
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "422":
+          description: Project validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrors"
+
+  /projects/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the project
+        schema:
+          type: integer
+          minimum: 1
+
+    get:
+      summary: Get a project by ID
+      operationId: getProject
+      tags:
+        - Projects
+      responses:
+        "200":
+          description: Project retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+
+    patch:
+      summary: Partially update a project
+      operationId: updateProject
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectRequest"
+            example:
+              project:
+                name: Updated Employee Management
+                description: Updated project description
+      responses:
+        "200":
+          description: Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "422":
+          description: Project validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrors"
+        "404":
+          description: Project not found
+
+    put:
+      summary: Update a project
+      operationId: replaceProjectAttributes
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectRequest"
+            example:
+              project:
+                name: Updated Employee Management
+                description: Updated project description
+                status: active
+                start_date: "2026-10-15"
+                end_date: "2027-01-31"
+                member_ids: [2, 3]
+      responses:
+        "200":
+          description: Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "422":
+          description: Project validation failed
+        "404":
+          description: Project not found
+
+    delete:
+      summary: Delete a project
+      operationId: deleteProject
+      tags:
+        - Projects
+      responses:
+        "204":
+          description: Project deleted successfully
+        "404":
+          description: Project not found
+
+  /projects/{id}/members:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the project
+        schema:
+          type: integer
+          minimum: 1
+
+    get:
+      summary: Get project members
+      operationId: getProjectMembers
+      tags:
+        - Projects
+      responses:
+        "200":
+          description: Project members retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectMember"
+              example:
+                - id: 2
+                  name: Employee One
+                - id: 3
+                  name: Employee Two
+        "404":
+          description: Project not found
+
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Employee Management
+        description:
+          type: string
+          nullable: true
+          example: Employee project management API
+        status:
+          type: string
+          example: planning
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-10-12"
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-12-31"
+
+    ProjectRequest:
+      type: object
+      required:
+        - project
+      properties:
+        project:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              example: Employee Management
+            description:
+              type: string
+              example: Employee project management API
+            status:
+              type: string
+              example: planning
+            start_date:
+              type: string
+              format: date
+              example: "2026-10-12"
+            end_date:
+              type: string
+              format: date
+              example: "2026-12-31"
+            member_ids:
+              type: array
+              items:
+                type: integer
+              example: [2, 3]
+
+    ProjectMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: Employee One
+
+    ValidationErrors:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
+      example:
+        name:
+          - can't be blank
